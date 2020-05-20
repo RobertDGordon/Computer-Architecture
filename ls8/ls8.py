@@ -2,10 +2,19 @@
 
 """Main."""
 
-import sys
+import sys, os
 from cpu import *
 
 cpu = CPU()
 
-cpu.load()
-cpu.run()
+if __name__ == '__main__':
+    try:
+        cpu.load(sys.argv[1])
+        cpu.run()
+    except KeyboardInterrupt:
+        cpu.halted = True
+        print('Interrupted')
+        # try:
+        #     sys.exit(0)
+        # except SystemExit:
+        #     os._exit(0)
