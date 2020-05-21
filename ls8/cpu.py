@@ -22,6 +22,14 @@ class CPU:
         self.mar = 0
         self.halted = False
 
+        self.ir = None
+
+        self.branchtable = {}
+        self.branchtable[LDI] = self.ldi # LDI
+        self.branchtable[PRN] = self.prn # PRN R0
+        self.branchtable[HLT] = self.hlt # HLT
+        self.branchtable[MUL] = self.mul # MUL
+
     def ram_read(self, address):
         return self.ram[address]
 
@@ -63,9 +71,9 @@ class CPU:
         
 
 
-    def alu(self, op, reg_a, reg_b):
+    def alu(self, reg_a, reg_b):
         """ALU operations."""
-
+        op = self.ir
         if op == "ADD":
             self.register[reg_a] += self.register[reg_b]
         elif op == MUL:
@@ -93,27 +101,31 @@ class CPU:
             print(" %02X" % self.reg[i], end='')
 
         print()
+    def ldi(self, a, b):
+        self.register[a] = b
+        self.pc += 3
+
+    def mul(self, a, b):
+        self.alu(a, b)
+        self.pc += 3
+
+    def prn(self, a, b):
+        print('')
+        print(self.register[a])
+        self.pc +=2
+
+    def hlt(self, a, b):
+        print('\nHalting.')
+        self.halted = True
+        sys.exit(0)
 
     def run(self):
         print('Running...')
         while not self.halted:
-            opcode = self.ram[self.pc]
+            IR = self.ram[self.pc]
+            self.ir = IR
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
-            if opcode == PRN:
-                print('')
-                print(self.register[operand_a])
-                self.pc += 2
-            elif opcode == LDI:
-                # print('LDI')
-                self.register[operand_a] = operand_b
-                self.pc += 3
-            elif opcode == MUL:
-                self.alu(opcode, operand_a, operand_b)
-                self.pc += 3
-            elif opcode == HLT:
-                print('\nHalting.')
-                self.halted = True
-                # sys.exit(0)
-        print('Halted.')
-        sys.exit(0)
+            self.branchtable[IR](operand_a, operand_b)
+        # print('Halted.')
+        # sys.exit(0)
