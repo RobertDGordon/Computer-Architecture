@@ -10,6 +10,12 @@ HLT = 0b00000001 # HLT
 
 MUL = 0b10100010 # MUL
 
+SP = 7 #Stack pointer
+
+PUSH = 0b01000101
+
+POP = 0b01000110
+
 class CPU:
     """Main CPU class."""
 
@@ -29,6 +35,9 @@ class CPU:
         self.branchtable[PRN] = self.prn # PRN R0
         self.branchtable[HLT] = self.hlt # HLT
         self.branchtable[MUL] = self.mul # MUL
+        self.branchtable[POP] = self.pop
+        self.branchtable[PUSH] = self.push
+
 
     def ram_read(self, address):
         return self.ram[address]
@@ -109,6 +118,20 @@ class CPU:
         self.alu(a, b)
         self.pc += 3
 
+    def pop(self, a, b):
+        # print('popping')
+        value = self.ram[self.register[SP]]
+        self.register[a] = value
+        self.register[SP] += 1
+        self.pc += 2
+
+    def push(self, a, b):
+        # print('pushing')
+        self.register[SP] -= 1
+        value = self.register[a]
+        self.ram[self.register[SP]] = value
+        self.pc += 2
+
     def prn(self, a, b):
         print('')
         print(self.register[a])
@@ -129,3 +152,7 @@ class CPU:
             self.branchtable[IR](operand_a, operand_b)
         # print('Halted.')
         # sys.exit(0)
+
+#bitmasking
+#bitwise
+#convert hex/binary
